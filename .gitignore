@@ -17,6 +17,6 @@ build/
 *_example
 
 # Ignore my_torch
-my_torch
+my_perceptron
 
 bootstrap
