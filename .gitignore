@@ -19,7 +19,4 @@ build/
 # Ignore my_torch
 my_torch
 
-crypted
-message
-ciphered
-deciphered
+bootstrap
