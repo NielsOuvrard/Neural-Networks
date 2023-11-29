@@ -18,5 +18,3 @@ build/
 
 # Ignore my_torch
 my_perceptron
-
-bootstrap
