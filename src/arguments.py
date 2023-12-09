@@ -12,12 +12,11 @@ class Arguments:
         self.input_file = ""
 
 def handle_arguments(argv, args):
-    x = 1
-    while x < len(argv):
+    for x in range(1, len(argv)):
         if argv[x][0] != '-':
             # Non-option argument (FILE)
             args.input_file = argv[x]
-            break
+            continue
 
         option = argv[x][2]
         if option == 'n':
@@ -46,7 +45,7 @@ def handle_arguments(argv, args):
             print("Invalid option. Use --help for help.")
             return 84
 
-        x += 1
+    print_arguments(args)
 
     # Validate if mandatory arguments are provided
     if not args.new_network and not args.load_network:
