@@ -1,11 +1,16 @@
 import sys
-import random
-import math
 import pandas as pd
 import numpy as np
+import ast
+import json
+
 
 def sigmoid(x):
-  return 1 / (1 + math.exp(-x))
+    return 1 / (1 + np.exp(-x))
+
+def sigmoid_derivative(x):
+    return x * (1 - x)
+
 
 class PerceptronArguments:
     def __init__(self):
@@ -98,73 +103,63 @@ def print_perceptron_usage():
 
 
 class NeuralNetwork:
-    def __init__(self, nb_inputs: int):
-        self.nb_inputs = nb_inputs
-        self.weights = [0.0] * nb_inputs
-        self.inputs = [0.0] * nb_inputs
-        self.bias = round(random.uniform(-10, 10))
+    def __init__(self, layers_sizes):
+        self.layers_sizes = layers_sizes
+        self.num_layers = len(layers_sizes)
+        self.weights = [np.random.uniform(-1, 1, (layers_sizes[i+1], layers_sizes[i])) for i in range(self.num_layers - 1)]
+        self.biases = [np.zeros((size, 1)) for size in layers_sizes[1:]]
+        self.activations = [np.zeros((size, 1)) for size in layers_sizes]
+        self.learning_rate = 0.01
 
-        for i in range(nb_inputs):
-            self.weights[i] = round(random.uniform(-1, 1), 3)
-            self.inputs[i] = round(random.uniform(-1, 1), 3)
+    def feed_forward(self, inputs):
+        self.activations[0] = inputs.reshape((len(inputs), 1))
 
-        print("self.inputs")
-        print(self.inputs)
-        print("self.weights")
-        print(self.weights)
-        print("self.bias")
-        print(self.bias)
-        print("")
+        for i in range(self.num_layers - 1):
+            weighted_sum = np.dot(self.weights[i], self.activations[i]) + self.biases[i]
+            self.activations[i + 1] = sigmoid(weighted_sum)
 
-    def __init__(self, perceptron_data: list):
-        # perceptron_data until the last one are the inputs
-        # the last one is the expected output
-        self.nb_inputs = len(perceptron_data) - 1
-        self.weights = [1.0] * self.nb_inputs
-        self.inputs = [0.0] * self.nb_inputs
-        self.bias = -1.5
-        self.expected_output = perceptron_data[self.nb_inputs]
-        self.predicted_output = 0.0
+        return self.activations[-1]
 
-        for i in range(self.nb_inputs):
-            self.inputs[i] = perceptron_data[i]
+    def train(self, inputs, expected_output):
+        # Perform feedforward to compute activations
+        self.feed_forward(inputs)
 
-        print("self.inputs")
-        print(self.inputs)
-        print("self.weights")
-        print(self.weights)
-        print("self.bias")
-        print(self.bias)
+        # Compute the error at the output layer
+        output_error = expected_output - self.activations[-1]
 
-    def __str__(self):
-        return "NeuralNetwork(nb_inputs={}, weights={}, bias={})".format(self.nb_inputs, self.weights, self.bias)
+        # Backpropagation
+        for i in reversed(range(self.num_layers - 1)):
+            # Compute the gradient at the current layer
+            gradient = sigmoid_derivative(self.activations[i + 1]) * output_error
+            gradient *= self.learning_rate
 
-    def __repr__(self):
-        return self.__str__()
+            # Update weights and biases
+            self.weights[i] += np.dot(gradient, self.activations[i].T)
+            self.biases[i] += gradient
 
-    def train(self):
-        tmp = self.predicted_output - self.expected_output
+            # Propagate the error to the previous layer
+            output_error = np.dot(self.weights[i].T, output_error)
 
-    # def feed_forward(self, a):
-    #     """Return the output of the neural network if `inputs` are given."""
-    #     for b, w in zip(self.biases, self.weights):
-    #         a = sigmoid(np.dot(w, a)+b)
-    #     return a
+    def cost(self, inputs, expected_output):
+        predictions = self.feed_forward(inputs)
+        return np.sum((expected_output - predictions) ** 2)
 
-    def cost(self):
-        cost_value = 0.0
-        for i in range(self.nb_inputs):
-            cost_value += pow(self.inputs[i] - self.expected_output[i], 2)
-        return cost_value
+    def predict(self, inputs):
+        return self.feed_forward(inputs)
 
-    def predict(self): # inputs
-        value = 0.0
-        for i in range(self.nb_inputs):
-            value += self.inputs[i] * self.weights[i]
-        value += self.bias # how calculate the bias ?
-        sigmoid_value = sigmoid(value)
-        self.predicted_output = sigmoid_value
-        return sigmoid_value
+    def save(self, filename):
+        data = {
+            'weights': [arr.tolist() for arr in self.weights],
+            'biases': [arr.tolist() for arr in self.biases]
+        }
+        with open(filename, 'w') as file:
+            json.dump(data, file)
+
+    def load(self, filename):
+        with open(filename, 'r') as file:
+            data = json.load(file)
+        self.weights = [np.array(data_list) for data_list in data['weights']]
+        self.biases = [np.array(data_list) for data_list in data['biases']]
 
 def main(argv):
     args = PerceptronArguments()
@@ -173,25 +168,49 @@ def main(argv):
         return 84
 
     if args.new_perceptron:
-        perceptron = NeuralNetwork(args.nb_inputs)
-        print(perceptron.predict())
+        perceptron_data = pd.read_csv(args.input_file)
+        to_train = perceptron_data.values.tolist()
+        # Set up the NeuralNetwork
+        input_size = args.nb_inputs
+        output_size = 1
+        hidden_layer_sizes = [8]  # adjust the number of hidden layers and nodes
+
+        nn = NeuralNetwork([input_size] + hidden_layer_sizes + [output_size])
+
+        # Training loop
+        epochs = 10000
+        for _ in range(epochs):
+            for data_point in to_train:
+                inputs = np.array(data_point[:-1])
+                expected_output = np.array([data_point[-1]])
+                nn.train(inputs, expected_output)
+
+        # Test the trained model on AND gate inputs
+        for data_point in to_train:
+            inputs = np.array(data_point[:-1])
+            expected_output = np.array([data_point[-1]])
+            prediction = nn.predict(inputs)
+            print(f"Inputs: {inputs}, Expected: {expected_output}, Predicted: {prediction} = {round(prediction[0][0])}")
+
+        if args.save_perceptron:
+            nn.save(args.save_file)
+
     elif args.load_perceptron:
-        perceptron_data = pd.read_csv(args.load_file)
-        line_of_data = len(perceptron_data.columns) - 1
-        perceptron_list = perceptron_data.values.tolist()
+        nn = NeuralNetwork([2, 8, 1])
+        nn.load(args.load_file)
+        perceptron_data = pd.read_csv(args.input_file)
+        # line_of_data = len(perceptron_data.columns) - 1
+        to_predict = perceptron_data.values.tolist()
+        for data_point in to_predict:
+            inputs = np.array(data_point[:-1])
+            expected_output = np.array([data_point[-1]])
+            prediction = nn.predict(inputs)
+            print(f"Inputs: {inputs}, Expected: {expected_output}, Predicted: {prediction} = {round(prediction[0][0])}")
 
-        for line in perceptron_list:
-            print(line)
-            perceptron = NeuralNetwork(line) # remove the first column
-            prediction = perceptron.predict()
-            if prediction != perceptron.expected_output:
-                perceptron.train()
-            print("prediction:", (prediction), "expected:", line[line_of_data])
-            print("", end="\n\n")
-            #
-
-    # print_perceptron_arguments(args)
     return 0
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
+
+# ./my_perceptron --new 2 --save save.json --mode train and.csv
+# ./my_perceptron --load save.json --mode predict and.csv
