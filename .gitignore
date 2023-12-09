@@ -16,7 +16,4 @@ build/
 # Ignore example files
 *_example
 
-# Ignore my_torch
-my_perceptron
-
 __pycache__
