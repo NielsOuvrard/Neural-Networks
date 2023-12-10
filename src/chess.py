@@ -84,6 +84,8 @@ filename = 'datasets/test.json'
 with open(filename, 'w') as file:
     json.dump(json_output, file)
 
+print(f'JSON output saved to {filename}')
+
 # call NN with:
 # inputs = 8 * 8
 # hidden layers = 2
