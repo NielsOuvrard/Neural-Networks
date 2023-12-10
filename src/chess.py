@@ -23,23 +23,22 @@ class Chess:
 
         return cls(checkmate=checkmate_value, res=res_value, board=board, turn=turn)
 
+    #     'r' = 'black_rook',
+    #     'n' = 'black_knight',
+    #     'b' = 'black_bishop',
+    #     'q' = 'black_queen',
+    #     'k' = 'black_king',
+    #     'p' = 'black_pawn',
+    #
+    #     'R' = 'white_rook',
+    #     'N' = 'white_knight',
+    #     'B' = 'white_bishop',
+    #     'Q' = 'white_queen',
+    #     'K' = 'white_king',
+    #     'P' = 'white_pawn'
     @staticmethod
     def parse_fen(fen):
-        pieces = {
-            'r': 'black_rook',
-            'n': 'black_knight',
-            'b': 'black_bishop',
-            'q': 'black_queen',
-            'k': 'black_king',
-            'p': 'black_pawn',
-            'R': 'white_rook',
-            'N': 'white_knight',
-            'B': 'white_bishop',
-            'Q': 'white_queen',
-            'K': 'white_king',
-            'P': 'white_pawn'
-        }
-        board = [['' for _ in range(8)] for _ in range(8)]
+        board = ['.' for _ in range(8 * 8)]
 
         fen_parts = fen.split(' ')
         rows = fen_parts[0].split('/')
@@ -50,17 +49,22 @@ class Chess:
                 if char.isdigit():
                     j += int(char)
                 else:
-                    board[i][j] = pieces[char]
+                    board[i + j] = char
                     j += 1
 
         return board, 'white' if fen_parts[1] == 'w' else 'black'
 
 
 
-chess_instance = Chess.from_file("data/test.txt")
+chess_instance = Chess.from_file("datasets/test.txt")
 print(f'Checkmate: {chess_instance.checkmate}')
 print(f'RES: {chess_instance.res}')
 print(f'Board:')
-for row in chess_instance.board:
-    print(row)
+for i in range(8):
+    print(chess_instance.board[i * 8: i * 8 + 8])
 print(f'Turn: {chess_instance.turn}')
+
+# call NN with:
+# inputs = 8 * 8
+# hidden layers = 2
+# outputs = 1
