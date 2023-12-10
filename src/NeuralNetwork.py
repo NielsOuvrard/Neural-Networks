@@ -55,7 +55,8 @@ class NeuralNetwork:
     def save(self, filename):
         data = {
             'weights': [arr.tolist() for arr in self.weights],
-            'biases': [arr.tolist() for arr in self.biases]
+            'biases': [arr.tolist() for arr in self.biases],
+            'layer_sizes': self.layers_sizes
         }
         with open(filename, 'w') as file:
             json.dump(data, file)
