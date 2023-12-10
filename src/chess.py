@@ -1,3 +1,5 @@
+import json
+
 class Chess:
     def __init__(self, checkmate, res, board, turn):
         self.checkmate = checkmate
@@ -55,14 +57,32 @@ class Chess:
         return board, 'white' if fen_parts[1] == 'w' else 'black'
 
 
+def board_to_json(board, checkmate):
+    # Create a 2D list representing the board
+    board_list = [[piece if piece else '.' for piece in row] for row in board]
+
+    # Convert the board to the desired JSON format
+    json_output = {
+        "inputs": [sum(board_list, [])],  # Flatten the 2D list into a 1D list
+        "output": str(checkmate)
+    }
+
+    return json_output
 
 chess_instance = Chess.from_file("datasets/test.txt")
-print(f'Checkmate: {chess_instance.checkmate}')
-print(f'RES: {chess_instance.res}')
-print(f'Board:')
-for i in range(8):
-    print(chess_instance.board[i * 8: i * 8 + 8])
-print(f'Turn: {chess_instance.turn}')
+
+# print(f'Checkmate: {chess_instance.checkmate}')
+# print(f'RES: {chess_instance.res}')
+# print(f'Board:')
+# for i in range(8):
+#     print(chess_instance.board[i * 8: i * 8 + 8])
+# print(f'Turn: {chess_instance.turn}')
+
+
+json_output = board_to_json(chess_instance.board, chess_instance.checkmate)
+filename = 'datasets/test.json'
+with open(filename, 'w') as file:
+    json.dump(json_output, file)
 
 # call NN with:
 # inputs = 8 * 8

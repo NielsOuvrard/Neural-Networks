@@ -1,28 +1,32 @@
 import sys
-import pandas as pd
 import numpy as np
 from arguments import Arguments, handle_arguments
 from NeuralNetwork import NeuralNetwork
+import json
 
 def execute(args : Arguments):
     if args.new_network:
-        perceptron_data = pd.read_csv(args.input_file)
-        to_train = perceptron_data.values.tolist()
+        with open(args.input_file, 'r') as json_file:
+            data = json.load(json_file)
+
+        to_train = data["inputs"]
+        output_value = data["output"]
+
         # Set up the NeuralNetwork
         nn = NeuralNetwork(args.layers)
 
         # Training loop
         epochs = 10000
         for _ in range(epochs):
-            for data_point in to_train:
-                inputs = np.array(data_point[:-1])
-                expected_output = np.array([data_point[-1]])
+            for i in range(len(to_train)):
+                inputs = np.array(to_train[i])
+                expected_output = np.array([output_value[i]])
                 nn.train(inputs, expected_output)
 
         # Test the trained model on AND gate inputs
-        for data_point in to_train:
-            inputs = np.array(data_point[:-1])
-            expected_output = np.array([data_point[-1]])
+        for i in range(len(to_train)):
+            inputs = np.array(to_train[i])
+            expected_output = np.array([output_value[i]])
             prediction = nn.predict(inputs)
             print(f"Inputs: {inputs}, Expected: {expected_output}, Predicted: {prediction} = {round(prediction[0][0])}")
 
@@ -30,18 +34,23 @@ def execute(args : Arguments):
             nn.save(args.save_file)
 
     elif args.save_network:
-        nn = NeuralNetwork([2, 8, 1])
+        nn = NeuralNetwork(args.layers)
         nn.load(args.load_file)
-        perceptron_data = pd.read_csv(args.input_file)
-        # line_of_data = len(perceptron_data.columns) - 1
-        to_predict = perceptron_data.values.tolist()
-        for data_point in to_predict:
-            inputs = np.array(data_point[:-1])
-            expected_output = np.array([data_point[-1]])
+
+        with open(args.input_file, 'r') as json_file:
+            data = json.load(json_file)
+
+        to_predict = data["inputs"]
+        output_value = data["output"]
+
+        for i in range(len(to_train)):
+            inputs = np.array(to_train[i])
+            expected_output = np.array([output_value[i]])
             prediction = nn.predict(inputs)
             print(f"Inputs: {inputs}, Expected: {expected_output}, Predicted: {prediction} = {round(prediction[0][0])}")
 
     return 0
+
 
 def main(argv):
     args = Arguments()
