@@ -77,6 +77,8 @@ def print_arguments(args):
     if args.save_network:
         print("Save Network:", args.save_file)
 
+    print("layers:", args.layers)
+
 def print_usage():
     print("USAGE")
     print("\t./my_torch [--new IN_LAYER [HIDDEN_LAYERS...] OUT_LAYER | --load LOADFILE] [--train | --predict] [--save SAVEFILE] FILE")
