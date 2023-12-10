@@ -33,7 +33,7 @@ def execute(args : Arguments):
         if args.save_network:
             nn.save(args.save_file)
 
-    elif args.save_network:
+    elif args.load_network:
         nn = NeuralNetwork(args.layers)
         nn.load(args.load_file)
 
@@ -41,13 +41,11 @@ def execute(args : Arguments):
             data = json.load(json_file)
 
         to_predict = data["inputs"]
-        output_value = data["output"]
 
-        for i in range(len(to_train)):
-            inputs = np.array(to_train[i])
-            expected_output = np.array([output_value[i]])
+        for i in range(len(to_predict)):
+            inputs = np.array(to_predict[i])
             prediction = nn.predict(inputs)
-            print(f"Inputs: {inputs}, Expected: {expected_output}, Predicted: {prediction} = {round(prediction[0][0])}")
+            print(f"Inputs: {inputs}, Predicted: {prediction} = {round(prediction[0][0])}")
 
     return 0
 

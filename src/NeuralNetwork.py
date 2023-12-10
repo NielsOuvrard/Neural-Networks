@@ -63,5 +63,7 @@ class NeuralNetwork:
     def load(self, filename):
         with open(filename, 'r') as file:
             data = json.load(file)
+        layers_sizes = [arr for arr in data["layer_sizes"]]
+        self.__init__(layers_sizes)
         self.weights = [np.array(data_list) for data_list in data['weights']]
         self.biases = [np.array(data_list) for data_list in data['biases']]
