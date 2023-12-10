@@ -1,4 +1,5 @@
 import json
+import sys
 
 class Chess:
     def __init__(self, checkmate, res, board, turn):
@@ -25,22 +26,23 @@ class Chess:
 
         return cls(checkmate=checkmate_value, res=res_value, board=board, turn=turn)
 
-    #     'r' = 'black_rook',
-    #     'n' = 'black_knight',
-    #     'b' = 'black_bishop',
-    #     'q' = 'black_queen',
-    #     'k' = 'black_king',
-    #     'p' = 'black_pawn',
-    #
-    #     'R' = 'white_rook',
-    #     'N' = 'white_knight',
-    #     'B' = 'white_bishop',
-    #     'Q' = 'white_queen',
-    #     'K' = 'white_king',
-    #     'P' = 'white_pawn'
     @staticmethod
     def parse_fen(fen):
-        board = ['.' for _ in range(8 * 8)]
+        pieces = {
+            'r': 1,
+            'n': 2,
+            'b': 3,
+            'q': 4,
+            'k': 5,
+            'p': 6,
+            'R': 7,
+            'N': 8,
+            'B': 9,
+            'Q': 10,
+            'K': 11,
+            'P': 12
+        }
+        board = [0 for _ in range(8 * 8)]
 
         fen_parts = fen.split(' ')
         rows = fen_parts[0].split('/')
@@ -51,42 +53,37 @@ class Chess:
                 if char.isdigit():
                     j += int(char)
                 else:
-                    board[i + j] = char
+                    board[(i * 8) + j] = pieces[char]
                     j += 1
 
         return board, 'white' if fen_parts[1] == 'w' else 'black'
 
 
 def board_to_json(board, checkmate):
-    # Create a 2D list representing the board
-    board_list = [[piece if piece else '.' for piece in row] for row in board]
-
     # Convert the board to the desired JSON format
     json_output = {
-        "inputs": [sum(board_list, [])],  # Flatten the 2D list into a 1D list
-        "output": str(checkmate)
+        "inputs": [board],
+        "output": int(checkmate),
+        "layer_sizes": [64, 32, 32, 32, 1], # ? not necessary
     }
 
     return json_output
 
-chess_instance = Chess.from_file("datasets/test.txt")
 
-# print(f'Checkmate: {chess_instance.checkmate}')
-# print(f'RES: {chess_instance.res}')
-# print(f'Board:')
-# for i in range(8):
-#     print(chess_instance.board[i * 8: i * 8 + 8])
-# print(f'Turn: {chess_instance.turn}')
+def main(argv):
+    if len(argv) != 3:
+        print(f'Usage: {argv[0]} <input_file> <output_file>')
+        return 84
 
+    chess_instance = Chess.from_file(argv[1])
 
-json_output = board_to_json(chess_instance.board, chess_instance.checkmate)
-filename = 'datasets/test.json'
-with open(filename, 'w') as file:
-    json.dump(json_output, file)
+    json_output = board_to_json(chess_instance.board, chess_instance.checkmate)
 
-print(f'JSON output saved to {filename}')
+    with open(argv[2], 'w') as file:
+        json.dump(json_output, file)
 
-# call NN with:
-# inputs = 8 * 8
-# hidden layers = 2
-# outputs = 1
+    print(f'JSON output saved to {argv[2]}')
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv))
