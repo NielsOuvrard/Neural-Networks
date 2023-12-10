@@ -45,8 +45,6 @@ def handle_arguments(argv, args):
             print("Invalid option. Use --help for help.")
             return 84
 
-    print_arguments(args)
-
     # Validate if mandatory arguments are provided
     if not args.new_network and not args.load_network:
         print("Either --new or --load must be specified. Use --help for help.")

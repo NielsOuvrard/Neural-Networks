@@ -17,3 +17,5 @@ build/
 *_example
 
 __pycache__
+
+datasets
