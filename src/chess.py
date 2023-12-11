@@ -1,30 +1,37 @@
 import json
 import sys
-
 class Chess:
-    def __init__(self, checkmate, res, board, turn):
-        self.checkmate = checkmate
-        self.res = res
-        self.board = board
-        self.turn = turn
+    def __init__(self, data):
+        self.data = data
 
     @classmethod
     def from_file(cls, filename):
+        all_data = []
+
         with open(filename, 'r') as file:
-            data = file.readlines()
+            lines = file.readlines()
 
-        checkmate_line = [line.strip() for line in data if line.startswith('CHECKMATE:')][0]
-        checkmate_value = checkmate_line.split(': ')[1].lower() == 'true'
+        for i in range(0, len(lines), 12):
+            game_data = lines[i:i + 12]
 
-        res_line = [line.strip() for line in data if line.startswith('RES:')][0]
-        res_value = res_line.split(': ')[1]
+            checkmate_line = [line.strip() for line in game_data if line.startswith('CHECKMATE:')][0]
+            checkmate_value = checkmate_line.split(': ')[1].lower() == 'true'
 
-        fen_line = [line.strip() for line in data if line.startswith('FEN:')][0]
-        fen_value = fen_line.split(': ')[1]
+            res_line = [line.strip() for line in game_data if line.startswith('RES:')][0]
+            res_value = res_line.split(': ')[1] # ? not necessary
 
-        board, turn = cls.parse_fen(fen_value)
+            fen_line = [line.strip() for line in game_data if line.startswith('FEN:')][0]
+            fen_value = fen_line.split(': ')[1]
 
-        return cls(checkmate=checkmate_value, res=res_value, board=board, turn=turn)
+            board, turn = cls.parse_fen(fen_value)
+
+            data = {
+                "inputs": board,
+                "output": checkmate_value
+            }
+
+            all_data.append(data)
+        return all_data
 
     @staticmethod
     def parse_fen(fen):
@@ -59,11 +66,19 @@ class Chess:
         return board, 'white' if fen_parts[1] == 'w' else 'black'
 
 
-def board_to_json(board, checkmate):
+def board_to_json(chess_instance):
     # Convert the board to the desired JSON format
+    inputs = []
+    for i in range(0, 1000):
+        inputs.append(chess_instance[i]["inputs"])
+
+    output = []
+    for i in range(0, 1000):
+        output.append(chess_instance[i]["output"])
+
     json_output = {
-        "inputs": [board],
-        "output": int(checkmate),
+        "inputs": inputs,
+        "output": output,
         "layer_sizes": [64, 32, 32, 32, 1], # ? not necessary
     }
 
@@ -77,8 +92,9 @@ def main(argv):
 
     chess_instance = Chess.from_file(argv[1])
 
-    json_output = board_to_json(chess_instance.board, chess_instance.checkmate)
+    print(f'Loaded {len(chess_instance)} games from {argv[1]}')
 
+    json_output = board_to_json(chess_instance)
     with open(argv[2], 'w') as file:
         json.dump(json_output, file)
 
@@ -87,3 +103,7 @@ def main(argv):
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
+
+
+# changer la fonction d'activation
+# changer le nombre de repetition du training

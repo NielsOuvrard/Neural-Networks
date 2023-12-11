@@ -15,20 +15,21 @@ def execute(args : Arguments):
         # Set up the NeuralNetwork
         nn = NeuralNetwork(args.layers)
 
-        # Training loop
-        epochs = 10000
-        for _ in range(epochs):
-            for i in range(len(to_train)):
-                inputs = np.array(to_train[i])
-                expected_output = np.array([output_value[i]])
-                nn.train(inputs, expected_output)
+        # epochs = 10000
+        # for _ in range(epochs):
+
+        # * Training loop
+        for i in range(len(to_train)):
+            inputs = np.array(to_train[i])
+            expected_output = np.array([output_value[i]])
+            nn.train(inputs, expected_output)
 
         # Test the trained model on AND gate inputs
         for i in range(len(to_train)):
             inputs = np.array(to_train[i])
             expected_output = np.array([output_value[i]])
             prediction = nn.predict(inputs)
-            print(f"Inputs: {inputs}, Expected: {expected_output}, Predicted: {prediction} = {round(prediction[0][0])}")
+            print(f"Expected: {expected_output}, Predicted: {prediction} = {round(prediction[0][0])}")
 
         if args.save_network:
             nn.save(args.save_file)
@@ -41,11 +42,28 @@ def execute(args : Arguments):
             data = json.load(json_file)
 
         to_predict = data["inputs"]
+        output_value = data["output"]
 
-        for i in range(len(to_predict)):
-            inputs = np.array(to_predict[i])
-            prediction = nn.predict(inputs)
-            print(f"Inputs: {inputs}, Predicted: {prediction} = {round(prediction[0][0])}")
+        # * Training loop
+        if args.train_mode:
+            for i in range(len(to_predict)):
+                inputs = np.array(to_predict[i])
+                expected_output = np.array([output_value[i]])
+                nn.train(inputs, expected_output)
+
+            if args.save_network:
+                nn.save(args.save_file)
+
+        # * Predicting loop
+        if args.predict_mode:
+            all_predictions = []
+            for i in range(len(to_predict)):
+                inputs = np.array(to_predict[i])
+                prediction = nn.predict(inputs)
+                output_value[i] = int(output_value[i])
+                all_predictions.append(round(prediction[0][0]) == output_value[i])
+                print(f"Expected: {output_value[i]}, Predicted: {prediction[0][0]} = {round(prediction[0][0])} -> {round(prediction[0][0]) == output_value[i]}")
+            print("Accuracy: ", sum(all_predictions) / len(all_predictions))
 
     return 0
 

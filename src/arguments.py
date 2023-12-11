@@ -58,6 +58,10 @@ def handle_arguments(argv, args):
         print("--new and --load cannot be used together. Use --help for help.")
         return 84
 
+    if args.predict_mode and args.new_network:
+        print("--predict and --new cannot be used together. Use --help for help.")
+        return 84
+
     return 0
 
 def print_arguments(args):
