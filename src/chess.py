@@ -10,13 +10,17 @@ class Chess:
 
         with open(filename, 'r') as file:
             lines = file.readlines()
-
+        change_true = False
         for i in range(0, len(lines), 12):
             game_data = lines[i:i + 12]
 
             checkmate_line = [line.strip() for line in game_data if line.startswith('CHECKMATE:')][0]
-            checkmate_value = checkmate_line.split(': ')[1].lower() == 'true'
-
+            if change_true == False:
+                checkmate_value = checkmate_line.split(': ')[1].lower() == 'true'
+                change_true = True
+            else:
+                checkmate_value = checkmate_line.split(': ')[1].lower() == 'false'
+                change_true = False
             res_line = [line.strip() for line in game_data if line.startswith('RES:')][0]
             res_value = res_line.split(': ')[1] # ? not necessary
 
@@ -25,7 +29,7 @@ class Chess:
 
             board, turn = cls.parse_fen(fen_value)
 
-            data = {
+            data = { 
                 "inputs": board,
                 "output": checkmate_value
             }
