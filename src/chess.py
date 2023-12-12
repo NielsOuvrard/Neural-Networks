@@ -12,13 +12,14 @@ class Chess:
             lines = file.readlines()
         with open(filename2, 'r') as file:
             lines2 = file.readlines()
+        print("lines: ", filename2)
         
         for i in range(0, len(lines) , 12):
             if (i <= len(lines)):
                 game_data = lines[i:i + 12]
 
                 checkmate_line = [line.strip() for line in game_data if line.startswith('CHECKMATE:')][0]
-                checkmate_value = checkmate_line.split(': ')[1].lower() == 'false'
+                checkmate_value = checkmate_line.split(': ')[1].lower() == 'true'
 
                 fen_line = [line.strip() for line in game_data if line.startswith('FEN:')][0]
                 fen_value = fen_line.split(': ')[1]
@@ -31,12 +32,12 @@ class Chess:
                 }
 
                 all_data.append(data)
-
+                # true // false
             if (i <= len(lines2)):
                 game_data = lines2[i:i + 12]
 
                 checkmate_line = [line.strip() for line in game_data if line.startswith('CHECKMATE:')][0]
-                checkmate_value = checkmate_line.split(': ')[1].lower() == 'false'
+                checkmate_value = checkmate_line.split(': ')[1].lower() == 'true'
 
                 fen_line = [line.strip() for line in game_data if line.startswith('FEN:')][0]
                 fen_value = fen_line.split(': ')[1]
