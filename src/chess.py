@@ -5,36 +5,50 @@ class Chess:
         self.data = data
 
     @classmethod
-    def from_file(cls, filename):
+    def from_file(cls, filename, filename2):
         all_data = []
 
         with open(filename, 'r') as file:
             lines = file.readlines()
-        change_true = False
-        for i in range(0, len(lines), 12):
-            game_data = lines[i:i + 12]
+        with open(filename2, 'r') as file:
+            lines2 = file.readlines()
+        
+        for i in range(0, len(lines) , 12):
+            if (i <= len(lines)):
+                game_data = lines[i:i + 12]
 
-            checkmate_line = [line.strip() for line in game_data if line.startswith('CHECKMATE:')][0]
-            if change_true == False:
-                checkmate_value = checkmate_line.split(': ')[1].lower() == 'true'
-                change_true = True
-            else:
+                checkmate_line = [line.strip() for line in game_data if line.startswith('CHECKMATE:')][0]
                 checkmate_value = checkmate_line.split(': ')[1].lower() == 'false'
-                change_true = False
-            res_line = [line.strip() for line in game_data if line.startswith('RES:')][0]
-            res_value = res_line.split(': ')[1] # ? not necessary
 
-            fen_line = [line.strip() for line in game_data if line.startswith('FEN:')][0]
-            fen_value = fen_line.split(': ')[1]
+                fen_line = [line.strip() for line in game_data if line.startswith('FEN:')][0]
+                fen_value = fen_line.split(': ')[1]
 
-            board, turn = cls.parse_fen(fen_value)
+                board, turn = cls.parse_fen(fen_value)
 
-            data = { 
-                "inputs": board,
-                "output": checkmate_value
-            }
+                data = {
+                    "inputs": board,
+                    "output": checkmate_value
+                }
 
-            all_data.append(data)
+                all_data.append(data)
+
+            if (i <= len(lines2)):
+                game_data = lines2[i:i + 12]
+
+                checkmate_line = [line.strip() for line in game_data if line.startswith('CHECKMATE:')][0]
+                checkmate_value = checkmate_line.split(': ')[1].lower() == 'false'
+
+                fen_line = [line.strip() for line in game_data if line.startswith('FEN:')][0]
+                fen_value = fen_line.split(': ')[1]
+
+                board, turn = cls.parse_fen(fen_value)
+
+                data = {
+                    "inputs": board,
+                    "output": checkmate_value
+                }
+
+                all_data.append(data)
         return all_data
 
     @staticmethod
@@ -90,24 +104,23 @@ def board_to_json(chess_instance):
 
 
 def main(argv):
-    if len(argv) != 3:
-        print(f'Usage: {argv[0]} <input_file> <output_file>')
+    if len(argv) != 4:
+        print(f'Usage: {argv[0]} <input_file> <input_file2> <output_file>')
         return 84
 
-    chess_instance = Chess.from_file(argv[1])
+    chess_instance = Chess.from_file(argv[1], argv[2])
 
-    print(f'Loaded {len(chess_instance)} games from {argv[1]}')
+    print(f'Loaded {len(chess_instance)} games from {argv[1]} and {argv[2]}')
 
     json_output = board_to_json(chess_instance)
-    with open(argv[2], 'w') as file:
+    with open(argv[3], 'w') as file:
         json.dump(json_output, file)
 
-    print(f'JSON output saved to {argv[2]}')
+    print(f'JSON output saved to {argv[3]}')
     return 0
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
-
 
 # changer la fonction d'activation
 # changer le nombre de repetition du training
