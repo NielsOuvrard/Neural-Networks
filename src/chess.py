@@ -1,5 +1,21 @@
 import json
 import sys
+
+
+#     'r' = 'black_rook',    = -5
+#     'n' = 'black_knight',  = -3
+#     'b' = 'black_bishop',  = -3
+#     'q' = 'black_queen',   = -9
+#     'k' = 'black_king',    = -200
+#     'p' = 'black_pawn',    = -1
+#
+#     'R' = 'white_rook',    = 5
+#     'N' = 'white_knight',  = 3
+#     'B' = 'white_bishop',  = 3
+#     'Q' = 'white_queen',   = 9
+#     'K' = 'white_king',    = 200
+#     'P' = 'white_pawn',    = 1
+
 class Chess:
     def __init__(self, data):
         self.data = data
@@ -13,60 +29,45 @@ class Chess:
         with open(filename2, 'r') as file:
             lines2 = file.readlines()
         print("lines: ", filename2)
-        
-        for i in range(0, len(lines) , 12):
-            if (i <= len(lines)):
+
+        def process_game_data(lines, all_data, cls, i):
+            if i < len(lines):
                 game_data = lines[i:i + 12]
-
                 checkmate_line = [line.strip() for line in game_data if line.startswith('CHECKMATE:')][0]
                 checkmate_value = checkmate_line.split(': ')[1].lower() == 'true'
 
                 fen_line = [line.strip() for line in game_data if line.startswith('FEN:')][0]
                 fen_value = fen_line.split(': ')[1]
 
-                board, turn = cls.parse_fen(fen_value)
+                board = cls.parse_fen(fen_value) if hasattr(cls, 'parse_fen') else (cls.parse_fen(fen_value), None)
 
                 data = {
                     "inputs": board,
-                    "output": checkmate_value
+                    "output": checkmate_value,
                 }
-
                 all_data.append(data)
-                # true // false
-            if (i <= len(lines2)):
-                game_data = lines2[i:i + 12]
 
-                checkmate_line = [line.strip() for line in game_data if line.startswith('CHECKMATE:')][0]
-                checkmate_value = checkmate_line.split(': ')[1].lower() == 'true'
-
-                fen_line = [line.strip() for line in game_data if line.startswith('FEN:')][0]
-                fen_value = fen_line.split(': ')[1]
-
-                board, turn = cls.parse_fen(fen_value)
-
-                data = {
-                    "inputs": board,
-                    "output": checkmate_value
-                }
-
-                all_data.append(data)
+        for i in range(0, len(lines) , 12):
+            process_game_data(lines, all_data, cls, i)
+            process_game_data(lines2, all_data, cls, i)
         return all_data
 
     @staticmethod
     def parse_fen(fen):
         pieces = {
-            'r': 1,
-            'n': 2,
-            'b': 3,
-            'q': 4,
-            'k': 5,
-            'p': 6,
-            'R': 7,
-            'N': 8,
-            'B': 9,
-            'Q': 10,
-            'K': 11,
-            'P': 12
+            'r': -5,
+            'n': -3,
+            'b': -3,
+            'q': -9,
+            'k': -200,
+            'p': -1,
+
+            'R': 5,
+            'N': 3,
+            'B': 3,
+            'Q': 9,
+            'K': 200,
+            'P': 1
         }
         board = [0 for _ in range(8 * 8)]
 
@@ -82,17 +83,17 @@ class Chess:
                     board[(i * 8) + j] = pieces[char]
                     j += 1
 
-        return board, 'white' if fen_parts[1] == 'w' else 'black'
+        return board#, 'white' if fen_parts[1] == 'w' else 'black'
 
 
 def board_to_json(chess_instance):
     # Convert the board to the desired JSON format
     inputs = []
-    for i in range(0, 1000):
+    for i in range(10):
         inputs.append(chess_instance[i]["inputs"])
 
     output = []
-    for i in range(0, 1000):
+    for i in range(10):
         output.append(chess_instance[i]["output"])
 
     json_output = {
