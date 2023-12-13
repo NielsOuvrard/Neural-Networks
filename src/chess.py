@@ -89,11 +89,11 @@ class Chess:
 def board_to_json(chess_instance):
     # Convert the board to the desired JSON format
     inputs = []
-    for i in range(10):
+    for i in range(1000):
         inputs.append(chess_instance[i]["inputs"])
 
     output = []
-    for i in range(10):
+    for i in range(1000):
         output.append(chess_instance[i]["output"])
 
     json_output = {

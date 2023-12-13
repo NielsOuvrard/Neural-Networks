@@ -21,7 +21,8 @@ class NeuralNetwork:
 
         for i in range(self.num_layers - 1):
             weighted_sum = np.dot(self.weights[i], self.activations[i]) + self.biases[i]
-            self.activations[i + 1] = sigmoid(weighted_sum)
+            clipped_weighted_sum = np.clip(weighted_sum, -500, 500)
+            self.activations[i + 1] = sigmoid(clipped_weighted_sum)
 
         return self.activations[-1]
 

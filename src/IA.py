@@ -15,21 +15,21 @@ def execute(args : Arguments):
         # Set up the NeuralNetwork
         nn = NeuralNetwork(args.layers)
 
-        # epochs = 10000
-        # for _ in range(epochs):
+        epochs = 100
+        for _ in range(epochs):
 
-        # * Training loop
-        for i in range(len(to_train)):
-            inputs = np.array(to_train[i])
-            expected_output = np.array([output_value[i]])
-            nn.train(inputs, expected_output)
+            # * Training loop
+            for i in range(len(to_train)):
+                inputs = np.array(to_train[i])
+                expected_output = np.array([output_value[i]])
+                nn.train(inputs, expected_output)
 
-        # Test the trained model on AND gate inputs
-        for i in range(len(to_train)):
-            inputs = np.array(to_train[i])
-            expected_output = np.array([output_value[i]])
-            prediction = nn.predict(inputs)
-            print(f"Expected: {expected_output}, Predicted: {prediction} = {round(prediction[0][0])}")
+            # Test the trained model on AND gate inputs
+            for i in range(len(to_train)):
+                inputs = np.array(to_train[i])
+                expected_output = np.array([output_value[i]])
+                prediction = nn.predict(inputs)
+                # print(f"Expected: {expected_output}, Predicted: {prediction} = {round(prediction[0][0])}")
 
         if args.save_network:
             nn.save(args.save_file)
@@ -62,7 +62,7 @@ def execute(args : Arguments):
                 prediction = nn.predict(inputs)
                 output_value[i] = int(output_value[i])
                 all_predictions.append(round(prediction[0][0]) == output_value[i])
-                print(f"Expected: {output_value[i]}, Predicted: {prediction[0][0]} = {round(prediction[0][0])} -> {round(prediction[0][0]) == output_value[i]}")
+                print(f"Expected: {output_value[i]}, Predicted: {round(prediction[0][0], 3)} = {round(prediction[0][0])} -> {round(prediction[0][0]) == output_value[i]}")
             print("Accuracy: ", sum(all_predictions) / len(all_predictions))
 
     return 0
