@@ -10,6 +10,8 @@ class Arguments:
         self.save_file = ""
         self.layers = []
         self.input_file = ""
+        self.learning_rate = 0.001
+        self.epochs = 10
 
 def handle_arguments(argv, args):
     for x in range(1, len(argv)):
@@ -29,6 +31,10 @@ def handle_arguments(argv, args):
             args.load_network = True
             x += 1
             args.load_file = argv[x]
+        elif option == 'r':
+            args.learning_rate = float(argv[x + 1])
+        elif option == 'e':
+            args.epochs = int(argv[x + 1])
         elif option == 't':
             args.train_mode = True
         elif option == 'p':
@@ -86,6 +92,8 @@ def print_usage():
     print("\t--new Creates a new neural network with random weights. Each subsequent number represents the number of neurons on each layer, from left to right. For example, ./my_torch –new 3 4 5 will create a neural network with an input layer of 3 neurons, a hidden layer of 4 neurons, and an output layer of 5 neurons.")
     print("\t--load Loads an existing neural network from LOADFILE.")
     print("\t--train Launches the neural network in training mode. Each board in FILE must contain inputs to send to the neural network, as well as the expected output.")
+    print("\t--rate RATE Sets the learning rate to RATE.")
+    print("\t--epochs EPOCHS Sets the number of epochs to EPOCHS.")
     print("\t--predict Launches the neural network in prediction mode. Each board in FILE must contain inputs to send to the neural network, and optionally an expected output.")
     print("\t--save Save neural network internal state into SAVEFILE.")
     print("\tFILE FILE containing chessboards")

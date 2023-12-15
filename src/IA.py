@@ -4,25 +4,39 @@ from arguments import Arguments, handle_arguments
 from NeuralNetwork import NeuralNetwork
 import json
 
+def relu(x):
+    return np.maximum(0, x)
+
+def relu_derivative(x):
+    return np.where(x > 0, 1, 0)
+
+def tanh(x):
+    return np.tanh(x)
+
+def tanh_derivative(x):
+    return 1 - np.tanh(x)**2
+
+def leaky_relu(x, alpha=0.01):
+    return np.where(x > 0, x, alpha * x)
+
+def leaky_relu_derivative(x, alpha=0.01):
+    return np.where(x > 0, 1, alpha)
+
 def execute(args : Arguments):
+    nn = NeuralNetwork(layers_sizes=args.layers, learning_rate=args.learning_rate)#, evaluation_function=relu, evaluation_function_derivative=relu_derivative)
     if args.new_network:
         # Set up the NeuralNetwork
-        nn = NeuralNetwork(args.layers)
 
         if args.train_mode:
             with open(args.input_file, 'r') as json_file:
                 data = json.load(json_file)
             to_train = data["inputs"]
             output_value = data["output"]
-            epochs = 1
-            for _ in range(epochs):
+            for _ in range(args.epochs):
 
                 # * Training loop
                 for i in range(len(to_train)):
                     inputs = np.array(to_train[i])
-                    print([output_value[i]])
-                    # expected_output = np.array(output_value[i])
-                    # print(expected_output)
                     nn.train(inputs, output_value[i])
 
                 # Test the trained model on AND gate inputs
@@ -36,7 +50,7 @@ def execute(args : Arguments):
             nn.save(args.save_file)
 
     elif args.load_network:
-        nn = NeuralNetwork(args.layers)
+
         nn.load(args.load_file)
 
         with open(args.input_file, 'r') as json_file:
@@ -63,7 +77,7 @@ def execute(args : Arguments):
                 prediction = nn.predict(inputs)
                 output_value[i] = int(output_value[i])
                 all_predictions.append(round(prediction[0][0]) == output_value[i])
-                print(f"Expected: {output_value[i]}, Predicted: {round(prediction[0][0], 3)} = {round(prediction[0][0])} -> {round(prediction[0][0]) == output_value[i]}")
+                # print(f"Expected: {output_value[i]}, Predicted: {round(prediction[0][0], 3)} = {round(prediction[0][0])} -> {round(prediction[0][0]) == output_value[i]}")
             print("Accuracy: ", sum(all_predictions) / len(all_predictions))
 
     return 0

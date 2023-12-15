@@ -36,14 +36,14 @@ class Chess:
         self.data = data
 
     @classmethod
-    def from_file(cls, filename, filename2):
+    def from_files(cls, *filenames):
         all_data = []
+        all_files_data = []
 
-        with open(filename, 'r') as file:
-            lines = file.readlines()
-        with open(filename2, 'r') as file:
-            lines2 = file.readlines()
-        print("lines: ", filename2)
+        for filename in filenames:
+            with open(filename, 'r') as file:
+                lines = file.readlines()
+                all_files_data.append(lines)
 
         def process_game_data(lines, all_data, cls, i):
             if i < len(lines):
@@ -62,10 +62,15 @@ class Chess:
                     "output": checkmate_value
                 }
                 all_data.append(data)
+                return 0
+            else:
+                return 1
 
-        for i in range(0, len(lines) , 12):
-            process_game_data(lines, all_data, cls, i)
-            process_game_data(lines2, all_data, cls, i)
+        for i in range(0, len(lines), 12):
+            for lines in all_files_data:
+                if process_game_data(lines, all_data, cls, i):
+                    return all_data
+
         return all_data
 
     @staticmethod
@@ -105,40 +110,42 @@ class Chess:
 def board_to_json(chess_instance):
     # Convert the board to the desired JSON format
     inputs = []
-    for i in range(len(chess_instance)):
+    for i in range(len(chess_instance) - 1, len(chess_instance) - 1 - 50, -1):
+    # for i in range(len(chess_instance) - 50):
         inputs.append(chess_instance[i]["inputs"])
 
     output = []
-    for i in range(len(chess_instance)):
+    for i in range(len(chess_instance) - 1, len(chess_instance) - 1 - 50, -1):
+    # for i in range(len(chess_instance) - 50):
         output.append(chess_instance[i]["output"])
 
     json_output = {
         "inputs": inputs,
         "output": output,
-        "layer_sizes": [64, 32, 32, 32, 3], # ? not necessary
+        "layer_sizes": [64, 32, 32, 32, 1],  # ? not necessary
     }
 
     return json_output
 
 
 def main(argv):
-    if len(argv) != 4:
-        print(f'Usage: {argv[0]} <input_file> <input_file2> <output_file>')
+    if len(argv) < 4:
+        print(f'Usage: {argv[0]} <input_file1> <input_file2> ... <output_file>')
         return 84
 
-    chess_instance = Chess.from_file(argv[1], argv[2])
+    input_files = argv[1:-1]
+    output_file = argv[-1]
 
-    print(f'Loaded {len(chess_instance)} games from {argv[1]} and {argv[2]}')
+    chess_instance = Chess.from_files(*input_files)
+
+    print(f'Loaded {len(chess_instance)} games from {", ".join(input_files)}')
 
     json_output = board_to_json(chess_instance)
-    with open(argv[3], 'w') as file:
+    with open(output_file, 'w') as file:
         json.dump(json_output, file)
 
-    print(f'JSON output saved to {argv[3]}')
+    print(f'JSON output saved to {output_file}')
     return 0
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
-
-# changer la fonction d'activation
-# changer le nombre de repetition du training
