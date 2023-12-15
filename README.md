@@ -5,6 +5,11 @@
 First, a neural network implementation in Python.
 Secondly, a converter from chessboards txt files to JSON files according to the neural network input format.
 
+## Requirements
+
+- Python 3.8
+- [NumPy](https://numpy.org/)
+
 ## Usage
 
 ```bash
