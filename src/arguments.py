@@ -50,10 +50,6 @@ def handle_arguments(argv, args):
         print("Either --new or --load must be specified. Use --help for help.")
         return 84
 
-    if not args.train_mode and not args.predict_mode:
-        print("Either --train or --predict must be specified. Use --help for help.")
-        return 84
-
     if args.new_network and args.load_network:
         print("--new and --load cannot be used together. Use --help for help.")
         return 84

@@ -12,7 +12,7 @@ class NeuralNetwork:
         self.layers_sizes = layers_sizes
         self.num_layers = len(layers_sizes)
         self.weights = [np.random.uniform(-1, 1, (layers_sizes[i+1], layers_sizes[i])) for i in range(self.num_layers - 1)]
-        self.biases = [np.zeros((size, 1)) for size in layers_sizes[1:]]
+        self.biases = [np.random.uniform(-1, 1, (size, 1)) for size in layers_sizes[1:]]
         self.activations = [np.zeros((size, 1)) for size in layers_sizes]
         self.learning_rate = 0.01
 
