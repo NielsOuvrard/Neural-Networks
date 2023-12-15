@@ -8,13 +8,15 @@ def sigmoid_derivative(x):
     return x * (1 - x)
 
 class NeuralNetwork:
-    def __init__(self, layers_sizes):
+    def __init__(self, layers_sizes, learning_rate=0.01, evaluation_function=sigmoid, evaluation_function_derivative=sigmoid_derivative):
         self.layers_sizes = layers_sizes
         self.num_layers = len(layers_sizes)
         self.weights = [np.random.uniform(-1, 1, (layers_sizes[i+1], layers_sizes[i])) for i in range(self.num_layers - 1)]
         self.biases = [np.random.uniform(-1, 1, (size, 1)) for size in layers_sizes[1:]]
         self.activations = [np.zeros((size, 1)) for size in layers_sizes]
-        self.learning_rate = 0.01
+        self.learning_rate = learning_rate
+        self.evaluation_function = evaluation_function
+        self.evaluation_function_derivative = evaluation_function_derivative
 
     def feed_forward(self, inputs):
         self.activations[0] = inputs.reshape((len(inputs), 1))
@@ -22,7 +24,7 @@ class NeuralNetwork:
         for i in range(self.num_layers - 1):
             weighted_sum = np.dot(self.weights[i], self.activations[i]) + self.biases[i]
             clipped_weighted_sum = np.clip(weighted_sum, -500, 500)
-            self.activations[i + 1] = sigmoid(clipped_weighted_sum)
+            self.activations[i + 1] = self.evaluation_function(clipped_weighted_sum)
 
         return self.activations[-1]
 
@@ -36,7 +38,7 @@ class NeuralNetwork:
         # Backpropagation
         for i in reversed(range(self.num_layers - 1)):
             # Compute the gradient at the current layer
-            gradient = sigmoid_derivative(self.activations[i + 1]) * output_error
+            gradient = self.evaluation_function_derivative(self.activations[i + 1]) * output_error
             gradient *= self.learning_rate
 
             # Update weights and biases

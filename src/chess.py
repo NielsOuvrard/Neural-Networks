@@ -16,6 +16,21 @@ import sys
 #     'K' = 'white_king',    = 200
 #     'P' = 'white_pawn',    = 1
 
+# "output": [
+#     1 if result_value == '1/2-1/2' else 0,
+#     1 if result_value == '1-0' else 0,
+#     1 if result_value == '0-1' else 0,
+# ]
+# "output":
+#     1 if result_value == '1/2-1/2' else 0,
+
+# RES: 1/2-1/2 / RES: 1-0 / RES: 0-1
+# 1/2-1/2 # output equal
+# 1-0     # output white win
+# 0-1     # output black win
+# result_value = result_line.split(': ')[1]
+# result_line = [line.strip() for line in game_data if line.startswith('RES:')][0]
+
 class Chess:
     def __init__(self, data):
         self.data = data
@@ -33,6 +48,7 @@ class Chess:
         def process_game_data(lines, all_data, cls, i):
             if i < len(lines):
                 game_data = lines[i:i + 12]
+
                 checkmate_line = [line.strip() for line in game_data if line.startswith('CHECKMATE:')][0]
                 checkmate_value = checkmate_line.split(': ')[1].lower() == 'true'
 
@@ -43,7 +59,7 @@ class Chess:
 
                 data = {
                     "inputs": board,
-                    "output": checkmate_value,
+                    "output": checkmate_value
                 }
                 all_data.append(data)
 
@@ -83,23 +99,23 @@ class Chess:
                     board[(i * 8) + j] = pieces[char]
                     j += 1
 
-        return board#, 'white' if fen_parts[1] == 'w' else 'black'
+        return board
 
 
 def board_to_json(chess_instance):
     # Convert the board to the desired JSON format
     inputs = []
-    for i in range(1000):
+    for i in range(len(chess_instance)):
         inputs.append(chess_instance[i]["inputs"])
 
     output = []
-    for i in range(1000):
+    for i in range(len(chess_instance)):
         output.append(chess_instance[i]["output"])
 
     json_output = {
         "inputs": inputs,
         "output": output,
-        "layer_sizes": [64, 32, 32, 32, 1], # ? not necessary
+        "layer_sizes": [64, 32, 32, 32, 3], # ? not necessary
     }
 
     return json_output
