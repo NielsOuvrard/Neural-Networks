@@ -104,6 +104,25 @@ nn = NeuralNetwork(
 )
 ```
 
+### Test
+
+We have implemented a test suite for the neural network class. With the following command, you can run the tests.
+
+```bash
+./tests/tests.sh
+```
+
+It will run the network with the datasets several times changing the learning rate, the number of epochs and the number of hidden layers.
+With this test suite, we found that the best parameters for the network are:
+
+```bash
+./my_torch --new 64 64 64 64 1 --train --epochs 50 --rate 0.01  --save save.json  all_10.json
+```
+
+The graph below shows the accuracy of the network with the best parameters.
+
+![Accuracy](./tests/tests.png)
+
 ## Authors
 
 - [**Niels Ouvrard**](mailto:niels.ouvrard@epitech.eu)
